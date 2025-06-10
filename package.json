@@ -11,8 +11,9 @@
     "next": "15.3.3"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^19"
+    "@types/react": "^19",
+    "transbank-sdk": "^6.0.0",
+    "typescript": "^5"
   }
 }
