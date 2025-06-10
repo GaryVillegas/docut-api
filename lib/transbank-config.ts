@@ -11,16 +11,13 @@ export const TRANSBANK_CONFIG = {
   RETURN_URL: process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}/api/transbank/return`
     : "http://localhost:3000/api/transbank/return",
+
+  // URL de tu app Ionic (reemplaza "tuapp" con tu esquema de URL)
+  APP_URL: "tuapp://payment",
 };
 
-// Tipos TypeScript para mejor desarrollo
-export interface TransactionRequest {
+export type TransactionRequest = {
   amount: number;
   sessionId: string;
   buyOrder: string;
-}
-
-export interface TransactionResponse {
-  token: string;
-  url: string;
-}
+};

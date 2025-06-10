@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { TRANSBANK_CONFIG } from "@/lib/transbank-config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,18 +8,46 @@ export async function POST(request: NextRequest) {
     const token = formData.get("token_ws") as string;
 
     if (!token) {
-      // Redireccionar a página de error en tu app
-      return NextResponse.redirect(new URL("/payment/error", request.url));
+      // Redireccionar a la app con error
+      return NextResponse.redirect(`${TRANSBANK_CONFIG.APP_URL}/error`);
     }
 
-    // Redireccionar a tu app con el token para confirmar
-    const redirectUrl = new URL("/payment/confirm", request.url);
-    redirectUrl.searchParams.set("token", token);
+    // Confirmar la transacción directamente aquí
+    const confirmResponse = await fetch(
+      `${TRANSBANK_CONFIG.WEBPAY_URL}/rswebpaytransaction/api/webpay/v1.2/transactions/${token}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Tbk-Api-Key-Id": TRANSBANK_CONFIG.COMMERCE_CODE,
+          "Tbk-Api-Key-Secret": TRANSBANK_CONFIG.API_KEY,
+        },
+      }
+    );
 
-    return NextResponse.redirect(redirectUrl);
+    const result = await confirmResponse.json();
+    const isSuccessful = result.status === "AUTHORIZED";
+
+    // Redireccionar a tu app con los resultados
+    const appRedirectUrl = new URL(TRANSBANK_CONFIG.APP_URL);
+    appRedirectUrl.searchParams.set(
+      "status",
+      isSuccessful ? "success" : "failure"
+    );
+    appRedirectUrl.searchParams.set("order", result.buy_order || "");
+    appRedirectUrl.searchParams.set("amount", result.amount?.toString() || "");
+
+    if (isSuccessful) {
+      appRedirectUrl.searchParams.set(
+        "authCode",
+        result.authorization_code || ""
+      );
+    }
+
+    return NextResponse.redirect(appRedirectUrl.toString());
   } catch (error) {
     console.error("Error en return URL:", error);
-    return NextResponse.redirect(new URL("/payment/error", request.url));
+    return NextResponse.redirect(`${TRANSBANK_CONFIG.APP_URL}/error`);
   }
 }
 
@@ -28,11 +57,44 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get("token_ws");
 
   if (!token) {
-    return NextResponse.redirect(new URL("/payment/error", request.url));
+    return NextResponse.redirect(`${TRANSBANK_CONFIG.APP_URL}/error`);
   }
 
-  const redirectUrl = new URL("/payment/confirm", request.url);
-  redirectUrl.searchParams.set("token", token);
+  // Mismo proceso que en POST
+  try {
+    const confirmResponse = await fetch(
+      `${TRANSBANK_CONFIG.WEBPAY_URL}/rswebpaytransaction/api/webpay/v1.2/transactions/${token}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Tbk-Api-Key-Id": TRANSBANK_CONFIG.COMMERCE_CODE,
+          "Tbk-Api-Key-Secret": TRANSBANK_CONFIG.API_KEY,
+        },
+      }
+    );
 
-  return NextResponse.redirect(redirectUrl);
+    const result = await confirmResponse.json();
+    const isSuccessful = result.status === "AUTHORIZED";
+
+    const appRedirectUrl = new URL(TRANSBANK_CONFIG.APP_URL);
+    appRedirectUrl.searchParams.set(
+      "status",
+      isSuccessful ? "success" : "failure"
+    );
+    appRedirectUrl.searchParams.set("order", result.buy_order || "");
+    appRedirectUrl.searchParams.set("amount", result.amount?.toString() || "");
+
+    if (isSuccessful) {
+      appRedirectUrl.searchParams.set(
+        "authCode",
+        result.authorization_code || ""
+      );
+    }
+
+    return NextResponse.redirect(appRedirectUrl.toString());
+  } catch (error) {
+    console.error("Error en return URL:", error);
+    return NextResponse.redirect(`${TRANSBANK_CONFIG.APP_URL}/error`);
+  }
 }
