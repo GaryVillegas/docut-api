@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     // Confirmar la transacción directamente aquí
     const confirmResponse = await fetch(
-      `${TRANSBANK_CONFIG.WEBPAY_URL}/rswebpaytransaction/api/webpay/v1.2/transactions/${token}`,
+      `${TRANSBANK_CONFIG.WEBPAY_URL}/webpayserver/init_transaction?${token}`,
       {
         method: "PUT",
         headers: {

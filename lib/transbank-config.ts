@@ -6,15 +6,10 @@ export interface TransactionRequest {
 
 export const TRANSBANK_CONFIG = {
   // Para testing usa estas URLs
-  WEBPAY_URL:
-    process.env.TRANSBANK_ENVIRONMENT === "production"
-      ? "https://webpay3g.transbank.cl"
-      : "https://webpay3gint.transbank.cl", // URL de integración
+  WEBPAY_URL: "https://webpay3gint.transbank.cl", // URL de integración
 
-  COMMERCE_CODE: process.env.TRANSBANK_COMMERCE_CODE || "597055555532", // Código de comercio de prueba
-  API_KEY:
-    process.env.TRANSBANK_API_KEY ||
-    "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C", // API Key de prueba
+  COMMERCE_CODE: "597055555532", // Código de comercio de prueba
+  API_KEY: "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C", // API Key de prueba
 
   RETURN_URL:
     process.env.TRANSBANK_RETURN_URL ||
